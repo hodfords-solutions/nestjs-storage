@@ -1,0 +1,21 @@
+{
+  "collection": "@nestjs/schematics",
+  "sourceRoot": "src",
+  "projects": {
+    "nestjs-storage": {
+      "type": "library",
+      "root": "libs",
+      "entryFile": "index",
+      "sourceRoot": "libs"
+    }
+  },
+  "compilerOptions": {
+    "webpack": false,
+    "assets": [
+      {
+        "include": "../libs/public/**",
+        "watchAssets": true
+      }
+    ]
+  }
+}
