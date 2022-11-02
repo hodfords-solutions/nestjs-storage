@@ -1,0 +1,97 @@
+{
+  "name": "@hodfords/nestjs-storage",
+  "version": "1.0.0",
+  "description": "",
+  "author": "",
+  "license": "UNLICENSED",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hodfords-solutions/nestjs-storage.git"
+  },
+  "scripts": {
+    "prebuild": "rimraf dist",
+    "build": "nest build",
+    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\" \"libs/**/*.ts\"",
+    "start": "nest start",
+    "start:dev": "npm run prebuild && nest start --watch",
+    "start:debug": "nest start --debug --watch",
+    "start:prod": "node dist/main",
+    "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:cov": "jest --coverage",
+    "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
+    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "wz-command": "wz-command",
+    "prepare": "is-ci || husky install",
+    "version": "auto-changelog && git add CHANGELOG.md",
+    "release:patch": "git add CHANGELOG.md && npm version patch --tag-version-prefix='' -f -m 'chore: release to %s'",
+    "release:push": "git push --no-verify && git push --tags --no-verify"
+  },
+  "devDependencies": {
+    "@nestjs/cli": "8.2.6",
+    "@nestjs/common": "8.4.5",
+    "@nestjs/core": "8.4.5",
+    "@nestjs/platform-express": "8.4.5",
+    "@nestjs/schematics": "8.0.11",
+    "@nestjs/testing": "8.4.5",
+    "@types/express": "4.17.13",
+    "@types/jest": "27.4.1",
+    "@types/multer": "1.4.7",
+    "@types/node": "16.18.3",
+    "@types/supertest": "2.0.12",
+    "@typescript-eslint/eslint-plugin": "5.26.0",
+    "@typescript-eslint/parser": "5.26.0",
+    "auto-changelog": "2.4.0",
+    "eslint": "8.16.0",
+    "eslint-config-prettier": "8.5.0",
+    "eslint-plugin-prettier": "4.0.0",
+    "husky": "8.0.1",
+    "is-ci": "3.0.1",
+    "jest": "27.5.1",
+    "lint-staged": "13.0.3",
+    "prettier": "2.6.2",
+    "reflect-metadata": "0.1.13",
+    "rimraf": "3.0.2",
+    "rxjs": "7.5.7",
+    "source-map-support": "0.5.21",
+    "supertest": "6.2.3",
+    "ts-jest": "27.1.5",
+    "ts-loader": "9.3.0",
+    "ts-node": "10.8.0",
+    "tsconfig-paths": "3.14.1",
+    "typescript": "4.6.4"
+  },
+  "jest": {
+    "moduleFileExtensions": [
+      "js",
+      "json",
+      "ts"
+    ],
+    "rootDir": ".",
+    "testRegex": ".*\\.spec\\.ts$",
+    "transform": {
+      "^.+\\.(t|j)s$": "ts-jest"
+    },
+    "collectCoverageFrom": [
+      "**/*.(t|j)s"
+    ],
+    "coverageDirectory": "./coverage",
+    "testEnvironment": "node",
+    "roots": [
+      "<rootDir>/src/",
+      "<rootDir>/libs/"
+    ],
+    "moduleNameMapper": {
+      "^@hodfords/nestjs-storage(|/.*)$": "<rootDir>/libs/nestjs-storage/src/$1"
+    }
+  },
+  "dependencies": {
+    "@azure/storage-blob": "12.10.0",
+    "adm-zip": "0.5.9",
+    "aws-sdk": "2.1209.0",
+    "date-fns": "2.28.0",
+    "express": "4.18.1",
+    "sharp": "0.30.6"
+  }
+}
