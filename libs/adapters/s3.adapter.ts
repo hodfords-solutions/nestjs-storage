@@ -22,7 +22,8 @@ export class S3Adapter extends BaseStorageAdapter implements StorageAdapter {
         super();
         this.containerClient = new AWS.S3({
             accessKeyId: account.name,
-            secretAccessKey: account.key
+            secretAccessKey: account.key,
+            signatureVersion: 'v4'
         });
     }
 
