@@ -1,10 +1,17 @@
 import { v4 as uuidv4 } from 'uuid';
 import path from 'path';
+import slugify from 'slugify';
 
 export function generateUniqueName(filePath: string): string {
     const uuid = uuidv4();
     const maxLength = 255;
-    const { dir, name, ext } = path.parse(filePath);
+    let { dir, name, ext } = path.parse(filePath);
+    name = slugify(name, {
+        replacement: '-',
+        lower: true,
+        strict: true,
+        trim: true
+    });
     const expectedFileNameLength = name.length + uuid.length + 1 + ext.length;
 
     if (expectedFileNameLength > maxLength) {
