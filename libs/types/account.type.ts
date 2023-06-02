@@ -1,6 +1,7 @@
 export type AccountType = {
     containerName: string;
     expiredIn: number;
+    region: string;
 };
 
 export type AzureAccountType = AccountType & {
