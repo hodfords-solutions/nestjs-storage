@@ -1,7 +1,6 @@
 export type AccountType = {
     containerName: string;
     expiredIn: number;
-    region: string;
 };
 
 export type AzureAccountType = AccountType & {
@@ -9,4 +8,6 @@ export type AzureAccountType = AccountType & {
     key: string;
 };
 
-export type S3AccountType = Partial<AzureAccountType>;
+export type S3AccountType = AzureAccountType & {
+    region?: string;
+};
