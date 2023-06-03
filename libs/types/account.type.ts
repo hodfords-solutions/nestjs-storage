@@ -8,4 +8,6 @@ export type AzureAccountType = AccountType & {
     key: string;
 };
 
-export type S3AccountType = Partial<AzureAccountType>;
+export type S3AccountType = AzureAccountType & {
+    region?: string;
+};
