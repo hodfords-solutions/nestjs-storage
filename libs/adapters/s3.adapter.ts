@@ -13,6 +13,7 @@ import { StorageAdapter } from '../interfaces/storage-adapter.interface';
 import SendData = ManagedUpload.SendData;
 import { BlobStorageProperties } from '../types/blob-storage-properties.type';
 import { S3AccountType } from '../types/account.type';
+import { ProxyAgent } from 'proxy-agent';
 
 @Injectable()
 export class S3Adapter extends BaseStorageAdapter implements StorageAdapter {
@@ -24,7 +25,10 @@ export class S3Adapter extends BaseStorageAdapter implements StorageAdapter {
             accessKeyId: account.name,
             secretAccessKey: account.key,
             signatureVersion: 'v4',
-            region: account.region
+            region: account.region,
+            httpOptions: {
+                agent: process.env.http_proxy ? new ProxyAgent() : undefined
+            }
         });
     }
 
