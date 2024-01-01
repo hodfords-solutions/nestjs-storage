@@ -1,18 +1,18 @@
 import { Inject, Injectable, InternalServerErrorException } from '@nestjs/common';
-import { Readable } from 'stream';
 import AWS from 'aws-sdk';
 import { ManagedUpload } from 'aws-sdk/lib/s3/managed_upload';
-import { addSeconds, differenceInSeconds } from 'date-fns';
+import dayjs from 'dayjs';
+import { Readable } from 'stream';
 import { CLOUD_ACCOUNT } from '../constants/provider.constants';
 import { SVG_FILE_TYPE } from '../constants/svg-file-type.constant';
-import { BaseStorageAdapter } from './base-storage.adapter';
-import { UploadFileType } from '../types/upload-file.type';
-import { BlobClient } from '../types/blob-client.type';
 import { generateUniqueName } from '../helpers/file-name.helper';
 import { StorageAdapter } from '../interfaces/storage-adapter.interface';
-import SendData = ManagedUpload.SendData;
-import { BlobStorageProperties } from '../types/blob-storage-properties.type';
 import { S3AccountType } from '../types/account.type';
+import { BlobClient } from '../types/blob-client.type';
+import { BlobStorageProperties } from '../types/blob-storage-properties.type';
+import { UploadFileType } from '../types/upload-file.type';
+import { BaseStorageAdapter } from './base-storage.adapter';
+import SendData = ManagedUpload.SendData;
 import { ProxyAgent } from 'proxy-agent';
 
 @Injectable()
@@ -55,30 +55,40 @@ export class S3Adapter extends BaseStorageAdapter implements StorageAdapter {
         throw new TypeError('Implement later');
     }
 
+    private generateBlobName(fileName: string, blobName: string): string {
+        if (blobName) {
+            return blobName;
+        }
+        return generateUniqueName(fileName);
+    }
+
     public async uploadFile(data: UploadFileType) {
-        const { file, fileName, mimetype } = data;
+        const { file, fileName, mimetype, blobName } = data;
         const blobOptions = mimetype === SVG_FILE_TYPE ? { ContentType: SVG_FILE_TYPE } : {};
-        let blobName: string;
+        let uniqueBlobName: string;
         let blockBlobClient: SendData;
 
         try {
             if (file instanceof Buffer) {
-                blobName = generateUniqueName(fileName || '');
+                uniqueBlobName = this.generateBlobName(fileName || '', blobName);
                 blockBlobClient = await this.containerClient
                     .upload({
                         ...blobOptions,
-                        Key: blobName,
+                        Key: uniqueBlobName,
                         Bucket: this.account.containerName,
                         Body: file
                     })
                     .promise();
             } else {
-                blobName = generateUniqueName(fileName || this.getFileNameToUpload(file as Express.Multer.File));
+                uniqueBlobName = this.generateBlobName(
+                    fileName || this.getFileNameToUpload(file as Express.Multer.File),
+                    blobName
+                );
                 if (file.buffer) {
                     blockBlobClient = await this.containerClient
                         .upload({
                             ...blobOptions,
-                            Key: blobName,
+                            Key: uniqueBlobName,
                             Bucket: this.account.containerName,
                             Body: file.buffer
                         })
@@ -86,7 +96,7 @@ export class S3Adapter extends BaseStorageAdapter implements StorageAdapter {
                 } else {
                     blockBlobClient = await this.containerClient
                         .upload({
-                            Key: blobName,
+                            Key: uniqueBlobName,
                             Bucket: this.account.containerName,
                             Body: file,
                             ContentType: file.mimetype
@@ -119,20 +129,26 @@ export class S3Adapter extends BaseStorageAdapter implements StorageAdapter {
 
     public generatePresignedUrl(
         blobName: string,
-        expiresOn = addSeconds(new Date(), this.account.expiredIn),
+        expiresOn = dayjs().add(this.account.expiredIn, 'second').toDate(),
         options: any = {}
     ) {
         const sasOptions = {
             Bucket: this.account.containerName,
             Key: blobName,
-            Expires: differenceInSeconds(expiresOn, new Date()),
+            Expires: dayjs(expiresOn).diff(dayjs(new Date()), 'second'),
             ...options
         };
         return this.containerClient.getSignedUrl('getObject', sasOptions);
     }
 
-    async uploadBlobreadable(readable: Readable, blobName: string) {
-        throw new TypeError('Implement later');
+    uploadBlobreadable(readable: Readable, blobName: string) {
+        return this.containerClient
+            .upload({
+                Key: blobName,
+                Bucket: this.account.containerName,
+                Body: readable
+            })
+            .promise();
     }
 
     async createBufferFromBlob(blobName: string): Promise<Buffer | null> {

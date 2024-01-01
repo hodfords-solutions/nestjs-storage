@@ -9,18 +9,18 @@ import {
     StorageSharedKeyCredential
 } from '@azure/storage-blob';
 import { Inject, Injectable, InternalServerErrorException } from '@nestjs/common';
-import addSeconds from 'date-fns/addSeconds';
+import dayjs from 'dayjs';
 import stream, { Readable } from 'stream';
 import { CLOUD_ACCOUNT } from '../constants/provider.constants';
 import { SVG_FILE_TYPE } from '../constants/svg-file-type.constant';
-import { AzureAccountType } from '../types/account.type';
-import { BaseStorageAdapter } from './base-storage.adapter';
-import { UploadFileType } from '../types/upload-file.type';
-import { BlobClient } from '../types/blob-client.type';
 import { generateUniqueName } from '../helpers/file-name.helper';
 import { StorageAdapter } from '../interfaces/storage-adapter.interface';
+import { AzureAccountType } from '../types/account.type';
+import { BlobClient } from '../types/blob-client.type';
 import { BlobStorageProperties } from '../types/blob-storage-properties.type';
 import { BlobUploadHeaders } from '../types/blob-upload-headers.type';
+import { UploadFileType } from '../types/upload-file.type';
+import { BaseStorageAdapter } from './base-storage.adapter';
 
 @Injectable()
 export class AzureAdapter extends BaseStorageAdapter implements StorageAdapter {
@@ -102,7 +102,7 @@ export class AzureAdapter extends BaseStorageAdapter implements StorageAdapter {
 
     public generatePresignedUrl(
         blobName: string,
-        expiresOn = addSeconds(new Date(), this.account.expiredIn),
+        expiresOn = dayjs().add(this.account.expiredIn, 'second').toDate(),
         options: Partial<BlobSASSignatureValues> = {}
     ) {
         const sasOptions: BlobSASSignatureValues = {
