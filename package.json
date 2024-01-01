@@ -1,6 +1,6 @@
 {
   "name": "@hodfords/nestjs-storage",
-  "version": "1.0.5",
+  "version": "8.0.0",
   "description": "",
   "author": "",
   "license": "UNLICENSED",
@@ -8,6 +8,10 @@
     "type": "git",
     "url": "git+https://github.com/hodfords-solutions/nestjs-storage.git"
   },
+  "bugs": {
+    "url": "https://github.com/hodfords-solutions/nestjs-storage/issues"
+  },
+  "homepage": "https://github.com/hodfords-solutions/nestjs-storage#readme",
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "nest build",
