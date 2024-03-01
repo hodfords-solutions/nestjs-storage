@@ -1,4 +1,4 @@
-import { Global, Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Global, Inject, Injectable } from '@nestjs/common';
 import AdmZip from 'adm-zip';
 import stream, { Readable } from 'stream';
 import sharp from 'sharp';
@@ -8,6 +8,13 @@ import { ADAPTER } from '../constants/provider.constants';
 import { BlobStorageProperties } from '../types/blob-storage-properties.type';
 import { BlobUploadHeaders } from '../types/blob-upload-headers.type';
 import { BlobSASSignatureValues } from '@azure/storage-blob';
+import { randomUUID } from 'crypto';
+import { JPEG_MIME_TYPE, SUPPORTED_FORMAT_CONVERT_TO_PNG_TYPES } from '../constants/file.constant';
+import { ImageDetailType } from '../types/image-detail.type';
+import { OptionUploadFileType } from '../types/option-upload-file.type';
+import { BlobClient } from '../types/blob-client.type';
+import { ImageFormatEnum } from '../enums/image-format.enum';
+import { MimeTypeEnum } from '../enums/mime-type.enum';
 
 @Global()
 @Injectable()
@@ -18,7 +25,18 @@ export class StorageService {
         StorageService.instance = this;
     }
 
-    uploadFile(file: UploadFileType) {
+    async uploadFile(file: UploadFileType, options?: OptionUploadFileType): Promise<BlobClient> {
+        if (options) {
+            const { mimeTypeConverts, imageFormat } = options;
+            if (mimeTypeConverts.includes(file.mimetype as MimeTypeEnum)) {
+                const imagePng = await this.convertImagesToPng(file, imageFormat);
+                return this.storage.uploadFile({
+                    file: imagePng.buffer,
+                    mimetype: imagePng.mimetype,
+                    fileName: file.fileName ?? imagePng.filename
+                });
+            }
+        }
         return this.storage.uploadFile(file);
     }
 
@@ -111,5 +129,36 @@ export class StorageService {
 
     getProperties(blobName: string): Promise<BlobStorageProperties> {
         return this.storage.getProperties(blobName);
+    }
+
+    async convertImagesToPng(data: UploadFileType, imageFormat: ImageFormatEnum): Promise<ImageDetailType> {
+        const { file, mimetype } = data;
+        let buffer: Buffer;
+        if (this.validateFileImageConvert(mimetype ?? ('mimetype' in file && file.mimetype))) {
+            throw new BadRequestException({ translate: 'error.file_not_support' });
+        }
+        if (file instanceof Buffer) {
+            buffer = await sharp(file).toFormat(imageFormat).toBuffer();
+        } else {
+            if (file.buffer) {
+                buffer = await sharp(file.buffer).toFormat(imageFormat).toBuffer();
+            } else {
+                buffer = await sharp((file as Express.Multer.File).path)
+                    .toFormat(imageFormat)
+                    .toBuffer();
+            }
+        }
+
+        const filename = randomUUID() + '.' + imageFormat;
+        return {
+            buffer: buffer,
+            mimetype: imageFormat === ImageFormatEnum.JPG ? JPEG_MIME_TYPE : `image/${imageFormat}`,
+            filename,
+            originalname: filename
+        };
+    }
+
+    validateFileImageConvert(mimetype: string): boolean {
+        return !SUPPORTED_FORMAT_CONVERT_TO_PNG_TYPES.includes(mimetype);
     }
 }
