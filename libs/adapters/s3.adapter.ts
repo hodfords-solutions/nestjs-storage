@@ -51,10 +51,10 @@ export class S3Adapter extends BaseStorageAdapter implements StorageAdapter {
         }
     }
 
-    async copyFileFromUrl(url: string, fileName: string) {
+    async copyFileFromUrl(url: string, fileName: string, isPublic: boolean) {
         const response = await fetch(url, { method: 'GET' });
         const buffer = Buffer.from(await response.arrayBuffer());
-        return this.uploadFile({ file: buffer as any, fileName });
+        return this.uploadFile({ file: buffer as any, fileName, isPublic: isPublic });
     }
 
     private generateBlobName(fileName: string, blobName: string): string {
@@ -78,7 +78,8 @@ export class S3Adapter extends BaseStorageAdapter implements StorageAdapter {
                         ...blobOptions,
                         Key: uniqueBlobName,
                         Bucket: this.account.containerName,
-                        Body: file
+                        Body: file,
+                        ACL: data.isPublic ? 'public-read' : undefined
                     })
                     .promise();
             } else {
@@ -92,7 +93,8 @@ export class S3Adapter extends BaseStorageAdapter implements StorageAdapter {
                             ...blobOptions,
                             Key: uniqueBlobName,
                             Bucket: this.account.containerName,
-                            Body: file.buffer
+                            Body: file.buffer,
+                            ACL: data.isPublic ? 'public-read' : undefined
                         })
                         .promise();
                 } else {
