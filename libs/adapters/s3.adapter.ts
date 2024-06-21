@@ -200,4 +200,8 @@ export class S3Adapter extends BaseStorageAdapter implements StorageAdapter {
     public async deleteFile(blobName: string) {
         throw new TypeError('Implement later');
     }
+
+    getPublicUrl(blobName: string): string {
+        return `https://${this.account.containerName}.s3.amazonaws.com/${blobName}`;
+    }
 }

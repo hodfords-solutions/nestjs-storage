@@ -166,4 +166,8 @@ export class AzureAdapter extends BaseStorageAdapter implements StorageAdapter {
             throw new InternalServerErrorException(error);
         }
     }
+
+    getPublicUrl(blobName: string): string {
+        throw new TypeError('Implement later');
+    }
 }

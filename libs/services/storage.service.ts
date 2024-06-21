@@ -52,10 +52,11 @@ export class StorageService {
     }
 
     getFileUrl(blobName: string, expiresOn?: Date, options: Partial<BlobSASSignatureValues> = {}) {
-        if (!blobName) {
-            return;
-        }
         return this.storage.generatePresignedUrl(blobName, expiresOn, options);
+    }
+
+    getPublicUrl(blobName: string) {
+        return this.storage.getPublicUrl(blobName);
     }
 
     async deleteIfExists(blobName: string) {
