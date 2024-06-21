@@ -44,11 +44,11 @@ export class StorageService {
         return this.storage.uploadStream(stream, fileName);
     }
 
-    copyFileFromUrl(url: string, blobName: string) {
+    copyFileFromUrl(url: string, blobName: string, isPublic?: boolean) {
         if (!blobName || !url) {
             return;
         }
-        return this.storage.copyFileFromUrl(url, blobName);
+        return this.storage.copyFileFromUrl(url, blobName, isPublic);
     }
 
     getFileUrl(blobName: string, expiresOn?: Date, options: Partial<BlobSASSignatureValues> = {}) {
