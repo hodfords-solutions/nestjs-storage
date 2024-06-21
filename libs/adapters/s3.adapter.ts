@@ -51,8 +51,10 @@ export class S3Adapter extends BaseStorageAdapter implements StorageAdapter {
         }
     }
 
-    copyFileFromUrl(url: string, blobName: string) {
-        throw new TypeError('Implement later');
+    async copyFileFromUrl(url: string, fileName: string) {
+        const response = await fetch(url, { method: 'GET' });
+        const buffer = Buffer.from(await response.arrayBuffer());
+        return this.uploadFile({ file: buffer as any, fileName });
     }
 
     public async uploadFile(data: UploadFileType) {
