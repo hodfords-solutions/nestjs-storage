@@ -19,4 +19,5 @@ export interface StorageAdapter {
     getFileBuffer(blobName: string): Promise<Buffer | null>;
     getProperties(blobName: string): Promise<BlobStorageProperties>;
     deleteFile(blobName: string): Promise<void>;
+    getPublicUrl(blobName: string): string;
 }
