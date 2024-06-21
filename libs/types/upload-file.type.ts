@@ -3,4 +3,5 @@ export type UploadFileType = {
     mimetype?: string;
     fileName?: string;
     blobName?: string;
+    isPublic?: boolean;
 };
