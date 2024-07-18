@@ -12,7 +12,7 @@ export interface StorageAdapter {
     copyFileFromUrl(url: string, blobName: string);
     uploadFile(data: UploadFileType): Promise<BlobClient>;
     deleteIfExists(blobName: string): Promise<void>;
-    generatePresignedUrl(blobName: string, expiresOn?: any, options?: any): string;
+    generatePresignedUrl(blobName: string, expiresOn?: any, options?: any): string | Promise<string>;
     uploadBlobreadable(readable: stream.Readable, blobName: string, httpHeaders?: BlobUploadHeaders);
     createBufferFromBlob(blobName: string): Promise<Buffer | null>;
     getFileStream(blobName: string): Promise<NodeJS.ReadableStream | undefined>;

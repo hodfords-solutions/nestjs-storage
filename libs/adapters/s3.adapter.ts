@@ -1,9 +1,6 @@
 import { Inject, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { Readable } from 'stream';
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import { Upload } from '@aws-sdk/lib-storage';
-import { GetObjectCommand, S3 } from '@aws-sdk/client-s3';
-import { ManagedUpload } from 'aws-sdk/lib/s3/managed_upload';
+import { S3Client, PutObjectCommand, DeleteObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
 import { addSeconds, differenceInSeconds } from 'date-fns';
 import { CLOUD_ACCOUNT } from '../constants/provider.constants';
 import { SVG_FILE_TYPE } from '../constants/svg-file-type.constant';
@@ -12,105 +9,94 @@ import { UploadFileType } from '../types/upload-file.type';
 import { BlobClient } from '../types/blob-client.type';
 import { generateUniqueName } from '../helpers/file-name.helper';
 import { StorageAdapter } from '../interfaces/storage-adapter.interface';
-import SendData = ManagedUpload.SendData;
 import { BlobStorageProperties } from '../types/blob-storage-properties.type';
 import { S3AccountType } from '../types/account.type';
 import { ProxyAgent } from 'proxy-agent';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import { Readable as ReadableStream } from 'stream';
+import * as fs from 'fs';
+import * as util from 'util';
 
 @Injectable()
 export class S3Adapter extends BaseStorageAdapter implements StorageAdapter {
-    private containerClient: S3;
+    private readonly containerClient: S3Client;
 
     public constructor(@Inject(CLOUD_ACCOUNT) private account: S3AccountType) {
         super();
-        this.containerClient = new S3({
+        this.containerClient = new S3Client({
             credentials: {
                 accessKeyId: account.name,
                 secretAccessKey: account.key
             },
-            signatureVersion: 'v4',
             region: account.region,
-            //@TODO: Need to re check
-            httpOptions: {
-                agent: process.env.http_proxy ? new ProxyAgent() : undefined
-            }
+            requestHandler: process.env.http_proxy ? new ProxyAgent() : undefined
         });
     }
 
     async uploadStream(stream: Readable, fileName: string): Promise<BlobClient> {
         try {
             const blobName = generateUniqueName(fileName);
-            const blockBlobClient = await new Upload({
-                client: this.containerClient,
-
-                params: {
-                    Key: blobName,
-                    Bucket: this.account.containerName,
-                    Body: stream
-                }
-            }).done();
+            const command = new PutObjectCommand({
+                Key: blobName,
+                Bucket: this.account.containerName,
+                Body: stream
+            });
+            await this.containerClient.send(command);
             return {
-                containerName: blockBlobClient.Bucket,
-                blobName: blockBlobClient.Key
+                containerName: this.account.containerName,
+                blobName: blobName
             };
         } catch (e) {
             throw new InternalServerErrorException(e);
         }
     }
 
-    copyFileFromUrl(url: string, blobName: string) {
-        throw new TypeError('Implement later');
+    async copyFileFromUrl(url: string, fileName: string) {
+        const response = await fetch(url, { method: 'GET' });
+        const buffer = Buffer.from(await response.arrayBuffer());
+        return this.uploadFile({ file: buffer as any, fileName });
     }
 
     public async uploadFile(data: UploadFileType) {
         const { file, fileName, mimetype } = data;
         const blobOptions = mimetype === SVG_FILE_TYPE ? { ContentType: SVG_FILE_TYPE } : {};
         let blobName: string;
-        let blockBlobClient: SendData;
-
         try {
             if (file instanceof Buffer) {
                 blobName = generateUniqueName(fileName || '');
-                blockBlobClient = await new Upload({
-                    client: this.containerClient,
-
-                    params: {
-                        ...blobOptions,
-                        Key: blobName,
-                        Bucket: this.account.containerName,
-                        Body: file
-                    }
-                }).done();
+                const command = new PutObjectCommand({
+                    ...blobOptions,
+                    Key: blobName,
+                    Bucket: this.account.containerName,
+                    Body: file
+                });
+                await this.containerClient.send(command);
             } else {
                 blobName = generateUniqueName(fileName || this.getFileNameToUpload(file as Express.Multer.File));
                 if (file.buffer) {
-                    blockBlobClient = await new Upload({
-                        client: this.containerClient,
-
-                        params: {
-                            ...blobOptions,
-                            Key: blobName,
-                            Bucket: this.account.containerName,
-                            Body: file.buffer
-                        }
-                    }).done();
+                    const command = new PutObjectCommand({
+                        ...blobOptions,
+                        Key: blobName,
+                        Bucket: this.account.containerName,
+                        Body: file.buffer
+                    });
+                    await this.containerClient.send(command);
                 } else {
-                    blockBlobClient = await new Upload({
-                        client: this.containerClient,
-
-                        params: {
-                            Key: blobName,
-                            Bucket: this.account.containerName,
-                            Body: file,
-                            ContentType: file.mimetype
-                        }
-                    }).done();
+                    const readFile = util.promisify(fs.readFile);
+                    const fileContent = await readFile(file.path);
+                    const command = new PutObjectCommand({
+                        Key: blobName,
+                        Bucket: this.account.containerName,
+                        Body: fileContent,
+                        ContentType: file.mimetype
+                    });
+                    await this.containerClient.send(command);
                 }
             }
 
             return {
-                containerName: blockBlobClient.Bucket,
-                blobName: blockBlobClient.Key
+                containerName: this.account.containerName,
+                blobName
             };
         } catch (e) {
             throw new InternalServerErrorException(e);
@@ -118,28 +104,34 @@ export class S3Adapter extends BaseStorageAdapter implements StorageAdapter {
     }
 
     async deleteIfExists(blobName: string): Promise<void> {
-        if (typeof blobName === 'undefined' || blobName === null || blobName === '') {
-            return;
-        }
-
-        await this.containerClient.deleteObject({
+        if (!blobName) return;
+        const command = new DeleteObjectCommand({
             Bucket: this.account.containerName,
             Key: blobName
         });
+
+        await this.containerClient.send(command);
     }
 
-    public generatePresignedUrl(
+    public async generatePresignedUrl(
         blobName: string,
         expiresOn = addSeconds(new Date(), this.account.expiredIn),
         options: any = {}
-    ) {
-        const sasOptions = {
+    ): Promise<string> {
+        const command = new GetObjectCommand({
             Bucket: this.account.containerName,
             Key: blobName,
-            Expires: differenceInSeconds(expiresOn, new Date()),
             ...options
-        };
-        return getSignedUrl(this.containerClient, new GetObjectCommand(sasOptions));
+        });
+
+        try {
+            return await getSignedUrl(this.containerClient, command, {
+                expiresIn: differenceInSeconds(expiresOn, new Date())
+            });
+        } catch (error) {
+            console.error(error);
+            return '';
+        }
     }
 
     async uploadBlobreadable(readable: Readable, blobName: string) {
@@ -151,20 +143,18 @@ export class S3Adapter extends BaseStorageAdapter implements StorageAdapter {
     }
 
     public async getFileStream(blobName: string): Promise<NodeJS.ReadableStream | undefined> {
-        const blobClient = await this.containerClient.getObject({
+        const command = new GetObjectCommand({
             Key: blobName,
             Bucket: this.account.containerName
         });
 
-        // if (blobClient.Body instanceof Blob) {
-        //     return blobClient.Body.stream();
-        // }
+        const blobClient = await this.containerClient.send(command);
 
-        if (blobClient.Body instanceof Readable) {
+        if (blobClient.Body instanceof ReadableStream) {
             return blobClient.Body;
         }
 
-        return Readable.from(blobClient.Body as any);
+        return ReadableStream.from(blobClient.Body as any);
     }
 
     public async getFileBuffer(blobName: string): Promise<Buffer | null> {
@@ -173,10 +163,11 @@ export class S3Adapter extends BaseStorageAdapter implements StorageAdapter {
     }
 
     async getProperties(blobName: string): Promise<BlobStorageProperties> {
-        const blobClient = await this.containerClient.getObject({
+        const command = new GetObjectCommand({
             Bucket: this.account.containerName,
             Key: blobName
         });
+        const blobClient = await this.containerClient.send(command);
         return {
             contentType: blobClient.ContentType || '',
             contentLength: blobClient.ContentLength || 0,
