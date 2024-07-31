@@ -9,7 +9,7 @@ export interface StorageAdapter {
     streamToBuffer(readableStream: NodeJS.ReadableStream | undefined): Promise<Buffer | null>;
     retrieveFileName(blobName: string): string;
     uploadStream(stream: Readable, fileName: string): Promise<BlobClient>;
-    copyFileFromUrl(url: string, blobName: string);
+    copyFileFromUrl(url: string, blobName: string, isPublic?: boolean);
     uploadFile(data: UploadFileType): Promise<BlobClient>;
     deleteIfExists(blobName: string): Promise<void>;
     generatePresignedUrl(blobName: string, expiresOn?: any, options?: any): string | Promise<string>;
@@ -19,4 +19,5 @@ export interface StorageAdapter {
     getFileBuffer(blobName: string): Promise<Buffer | null>;
     getProperties(blobName: string): Promise<BlobStorageProperties>;
     deleteFile(blobName: string): Promise<void>;
+    getPublicUrl(blobName: string): string;
 }

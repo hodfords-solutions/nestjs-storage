@@ -1,19 +1,18 @@
 import { Inject, Injectable, InternalServerErrorException } from '@nestjs/common';
-import { Readable } from 'stream';
-import { S3Client, PutObjectCommand, DeleteObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
-import { addSeconds, differenceInSeconds } from 'date-fns';
+import { Readable, Readable as ReadableStream } from 'stream';
+import dayjs from 'dayjs';
+import { DeleteObjectCommand, GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { CLOUD_ACCOUNT } from '../constants/provider.constants';
 import { SVG_FILE_TYPE } from '../constants/svg-file-type.constant';
-import { BaseStorageAdapter } from './base-storage.adapter';
-import { UploadFileType } from '../types/upload-file.type';
-import { BlobClient } from '../types/blob-client.type';
 import { generateUniqueName } from '../helpers/file-name.helper';
 import { StorageAdapter } from '../interfaces/storage-adapter.interface';
-import { BlobStorageProperties } from '../types/blob-storage-properties.type';
 import { S3AccountType } from '../types/account.type';
+import { BlobClient } from '../types/blob-client.type';
+import { BlobStorageProperties } from '../types/blob-storage-properties.type';
+import { UploadFileType } from '../types/upload-file.type';
+import { BaseStorageAdapter } from './base-storage.adapter';
 import { ProxyAgent } from 'proxy-agent';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import { Readable as ReadableStream } from 'stream';
 import * as fs from 'fs';
 import * as util from 'util';
 
@@ -44,48 +43,61 @@ export class S3Adapter extends BaseStorageAdapter implements StorageAdapter {
             await this.containerClient.send(command);
             return {
                 containerName: this.account.containerName,
-                blobName: blobName
+                blobName
             };
         } catch (e) {
             throw new InternalServerErrorException(e);
         }
     }
 
-    async copyFileFromUrl(url: string, fileName: string) {
+    async copyFileFromUrl(url: string, fileName: string, isPublic: boolean) {
         const response = await fetch(url, { method: 'GET' });
         const buffer = Buffer.from(await response.arrayBuffer());
-        return this.uploadFile({ file: buffer as any, fileName });
+        return this.uploadFile({ file: buffer as any, fileName, isPublic: isPublic });
+    }
+
+    private generateBlobName(fileName: string, blobName: string): string {
+        if (blobName) {
+            return blobName;
+        }
+        return generateUniqueName(fileName);
     }
 
     public async uploadFile(data: UploadFileType) {
-        const { file, fileName, mimetype } = data;
+        const { file, fileName, mimetype, blobName } = data;
         const blobOptions = mimetype === SVG_FILE_TYPE ? { ContentType: SVG_FILE_TYPE } : {};
-        let blobName: string;
+        let uniqueBlobName: string;
+
         try {
             if (file instanceof Buffer) {
-                blobName = generateUniqueName(fileName || '');
+                uniqueBlobName = this.generateBlobName(fileName || '', blobName);
                 const command = new PutObjectCommand({
                     ...blobOptions,
-                    Key: blobName,
+                    Key: uniqueBlobName,
                     Bucket: this.account.containerName,
-                    Body: file
+                    Body: file,
+                    ACL: data.isPublic ? 'public-read' : undefined
                 });
                 await this.containerClient.send(command);
             } else {
-                blobName = generateUniqueName(fileName || this.getFileNameToUpload(file as Express.Multer.File));
+                uniqueBlobName = this.generateBlobName(
+                    fileName || this.getFileNameToUpload(file as Express.Multer.File),
+                    blobName
+                );
                 if (file.buffer) {
                     const command = new PutObjectCommand({
                         ...blobOptions,
-                        Key: blobName,
+                        Key: uniqueBlobName,
                         Bucket: this.account.containerName,
-                        Body: file.buffer
+                        Body: file.buffer,
+                        ACL: data.isPublic ? 'public-read' : undefined
                     });
                     await this.containerClient.send(command);
                 } else {
                     const readFile = util.promisify(fs.readFile);
                     const fileContent = await readFile(file.path);
                     const command = new PutObjectCommand({
-                        Key: blobName,
+                        Key: uniqueBlobName,
                         Bucket: this.account.containerName,
                         Body: fileContent,
                         ContentType: file.mimetype
@@ -96,7 +108,7 @@ export class S3Adapter extends BaseStorageAdapter implements StorageAdapter {
 
             return {
                 containerName: this.account.containerName,
-                blobName
+                blobName: uniqueBlobName
             };
         } catch (e) {
             throw new InternalServerErrorException(e);
@@ -115,27 +127,29 @@ export class S3Adapter extends BaseStorageAdapter implements StorageAdapter {
 
     public async generatePresignedUrl(
         blobName: string,
-        expiresOn = addSeconds(new Date(), this.account.expiredIn),
-        options: any = {}
-    ): Promise<string> {
-        const command = new GetObjectCommand({
+        expiresOn = dayjs().add(this.account.expiredIn, 'second').toDate(),
+        options = {}
+    ) {
+        const sasOptions = {
             Bucket: this.account.containerName,
             Key: blobName,
             ...options
-        });
+        };
 
-        try {
-            return await getSignedUrl(this.containerClient, command, {
-                expiresIn: differenceInSeconds(expiresOn, new Date())
-            });
-        } catch (error) {
-            console.error(error);
-            return '';
-        }
+        const command = new GetObjectCommand(sasOptions);
+
+        return await getSignedUrl(this.containerClient, command, {
+            expiresIn: dayjs(expiresOn).diff(dayjs(new Date()), 'second')
+        });
     }
 
     async uploadBlobreadable(readable: Readable, blobName: string) {
-        throw new TypeError('Implement later');
+        const command = new PutObjectCommand({
+            Key: blobName,
+            Bucket: this.account.containerName,
+            Body: readable
+        });
+        await this.containerClient.send(command);
     }
 
     async createBufferFromBlob(blobName: string): Promise<Buffer | null> {
@@ -177,5 +191,9 @@ export class S3Adapter extends BaseStorageAdapter implements StorageAdapter {
 
     public async deleteFile(blobName: string) {
         throw new TypeError('Implement later');
+    }
+
+    getPublicUrl(blobName: string): string {
+        return `https://${this.account.containerName}.s3.amazonaws.com/${blobName}`;
     }
 }
