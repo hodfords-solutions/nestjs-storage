@@ -125,11 +125,14 @@ export class S3Adapter extends BaseStorageAdapter implements StorageAdapter {
         await this.containerClient.send(command);
     }
 
-    public async generatePresignedUrl(
+    public generatePresignedUrl(
         blobName: string,
         expiresOn = dayjs().add(this.account.expiredIn, 'second').toDate(),
         options = {}
     ) {
+        if (!blobName) {
+            return;
+        }
         const sasOptions = {
             Bucket: this.account.containerName,
             Key: blobName,
@@ -138,7 +141,7 @@ export class S3Adapter extends BaseStorageAdapter implements StorageAdapter {
 
         const command = new GetObjectCommand(sasOptions);
 
-        return await getSignedUrl(this.containerClient, command, {
+        return getSignedUrl(this.containerClient, command, {
             expiresIn: dayjs(expiresOn).diff(dayjs(new Date()), 'second')
         });
     }
