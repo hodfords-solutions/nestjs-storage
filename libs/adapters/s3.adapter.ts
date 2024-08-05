@@ -22,14 +22,19 @@ export class S3Adapter extends BaseStorageAdapter implements StorageAdapter {
 
     public constructor(@Inject(CLOUD_ACCOUNT) private account: S3AccountType) {
         super();
-        this.containerClient = new S3Client({
-            credentials: {
-                accessKeyId: account.name,
-                secretAccessKey: account.key
-            },
+
+        const s3ClientConfig: any = {
             region: account.region,
             requestHandler: process.env.http_proxy ? new ProxyAgent() : undefined
-        });
+        };
+        if (account.name && account.key) {
+            s3ClientConfig.credentials = {
+                accessKeyId: account.name,
+                secretAccessKey: account.key
+            };
+        }
+
+        this.containerClient = new S3Client(s3ClientConfig);
     }
 
     async uploadStream(stream: Readable, fileName: string): Promise<BlobClient> {
@@ -46,6 +51,7 @@ export class S3Adapter extends BaseStorageAdapter implements StorageAdapter {
                 blobName
             };
         } catch (e) {
+            console.error(e);
             throw new InternalServerErrorException(e);
         }
     }
@@ -111,6 +117,7 @@ export class S3Adapter extends BaseStorageAdapter implements StorageAdapter {
                 blobName: uniqueBlobName
             };
         } catch (e) {
+            console.error(e);
             throw new InternalServerErrorException(e);
         }
     }
