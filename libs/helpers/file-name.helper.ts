@@ -5,6 +5,7 @@ import slugify from 'slugify';
 export function generateUniqueName(filePath: string): string {
     const uuid = uuidv4();
     const maxLength = 255;
+    // eslint-disable-next-line prefer-const
     let { dir, name, ext } = path.parse(filePath);
     name = slugify(name, {
         replacement: '-',
