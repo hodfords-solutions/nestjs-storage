@@ -10,3 +10,4 @@ jobs:
     uses: hodfords-solutions/actions/.github/workflows/publish.yaml@main
     secrets:
       DOC_SSH_PRIVATE_KEY: ${{ secrets.DOC_SSH_PRIVATE_KEY }}
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
