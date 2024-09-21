@@ -1,6 +1,6 @@
 {
   "name": "@hodfords/nestjs-storage",
-  "version": "10.3.3",
+  "version": "10.3.4",
   "description": "Provides integration with third-party cloud storage solutions in NestJS apps",
   "homepage": "https://github.com/hodfords-solutions/nestjs-storage#readme",
   "bugs": {
