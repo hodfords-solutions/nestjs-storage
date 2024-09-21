@@ -16,7 +16,10 @@ import * as fs from 'fs';
 
 @Controller()
 export class AppController {
-    constructor(private readonly appService: AppService, private storageService: StorageService) {}
+    constructor(
+        private readonly appService: AppService,
+        private storageService: StorageService
+    ) {}
 
     @Get()
     @HttpCode(HttpStatus.OK)

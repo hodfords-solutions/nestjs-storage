@@ -167,6 +167,7 @@ export class AzureAdapter extends BaseStorageAdapter implements StorageAdapter {
         }
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     getPublicUrl(blobName: string): string {
         throw new TypeError('Implement later');
     }
