@@ -1,4 +1,4 @@
-import { StorageModule } from 'libs/storage.module';
+import { StorageModule } from 'lib/storage.module';
 import { env } from './env.config';
 
 export const storageConfig = StorageModule.forRoot({

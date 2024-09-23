@@ -1,6 +1,8 @@
 import {
+    BlobCopyFromURLResponse,
     BlobSASSignatureValues,
     BlobServiceClient,
+    BlobUploadCommonResponse,
     BlockBlobClient,
     BlockBlobParallelUploadOptions,
     ContainerClient,
@@ -52,13 +54,13 @@ export class AzureAdapter extends BaseStorageAdapter implements StorageAdapter {
         }
     }
 
-    copyFileFromUrl(url: string, blobName: string) {
+    copyFileFromUrl(url: string, blobName: string): Promise<BlobCopyFromURLResponse> {
         const sourceBlob = this.containerClient.getBlockBlobClient(blobName);
         const destinationBlob = this.containerClient.getBlockBlobClient(sourceBlob.name);
         return destinationBlob.syncCopyFromURL(url);
     }
 
-    public async uploadFile(data: UploadFileType) {
+    public async uploadFile(data: UploadFileType): Promise<BlobClient | undefined> {
         const { file, fileName, mimetype } = data;
         const blobOptions = mimetype === SVG_FILE_TYPE ? { blobHTTPHeaders: { blobContentType: SVG_FILE_TYPE } } : {};
         let blobName: string;
@@ -104,7 +106,7 @@ export class AzureAdapter extends BaseStorageAdapter implements StorageAdapter {
         blobName: string,
         expiresOn = dayjs().add(this.account.expiredIn, 'second').toDate(),
         options: Partial<BlobSASSignatureValues> = {}
-    ) {
+    ): string {
         const sasOptions: BlobSASSignatureValues = {
             containerName: this.account.containerName,
             blobName: blobName,
@@ -117,7 +119,11 @@ export class AzureAdapter extends BaseStorageAdapter implements StorageAdapter {
         return `${this.containerClient.getBlockBlobClient(blobName).url}?${sasToken}`;
     }
 
-    uploadBlobreadable(readable: stream.Readable, blobName: string, httpHeaders?: BlobUploadHeaders) {
+    uploadBlobreadable(
+        readable: stream.Readable,
+        blobName: string,
+        httpHeaders?: BlobUploadHeaders
+    ): Promise<BlobUploadCommonResponse> {
         const bufferSize = 800;
         const maxConcurrency = 5;
 
