@@ -15,6 +15,7 @@ import { OptionUploadFileType } from '../types/option-upload-file.type';
 import { BlobClient } from '../types/blob-client.type';
 import { ImageFormatEnum } from '../enums/image-format.enum';
 import { MimeTypeEnum } from '../enums/mime-type.enum';
+import { ImageWithThumbnailType } from 'lib/types/image-with-thumbnail.type';
 
 @Global()
 @Injectable()
@@ -40,7 +41,7 @@ export class StorageService {
         return this.storage.uploadFile(file);
     }
 
-    uploadStream(stream: Readable, fileName: string) {
+    uploadStream(stream: Readable, fileName: string): Promise<BlobClient> {
         return this.storage.uploadStream(stream, fileName);
     }
 
@@ -51,19 +52,23 @@ export class StorageService {
         return this.storage.copyFileFromUrl(url, blobName, isPublic);
     }
 
-    getFileUrl(blobName: string, expiresOn?: Date, options: Partial<BlobSASSignatureValues> = {}) {
+    getFileUrl(
+        blobName: string,
+        expiresOn?: Date,
+        options: Partial<BlobSASSignatureValues> = {}
+    ): string | Promise<string> {
         return this.storage.generatePresignedUrl(blobName, expiresOn, options);
     }
 
-    getPublicUrl(blobName: string) {
+    getPublicUrl(blobName: string): string {
         return this.storage.getPublicUrl(blobName);
     }
 
-    async deleteIfExists(blobName: string) {
+    async deleteIfExists(blobName: string): Promise<void> {
         await this.storage.deleteIfExists(blobName);
     }
 
-    async deleteFile(blobName: string) {
+    async deleteFile(blobName: string): Promise<void> {
         await this.storage.deleteFile(blobName);
     }
 
@@ -71,7 +76,7 @@ export class StorageService {
         return this.storage.uploadBlobreadable(readable, blobName, httpHeaders);
     }
 
-    createBufferFromBlob(blobName: string) {
+    createBufferFromBlob(blobName: string): Promise<Buffer> {
         return this.storage.createBufferFromBlob(blobName);
     }
 
@@ -106,7 +111,7 @@ export class StorageService {
         return sharp(image).resize(resizedWith, resizedHeight).toBuffer();
     }
 
-    async uploadImageWithThumbnail(image, fileName?: string) {
+    async uploadImageWithThumbnail(image, fileName?: string): Promise<ImageWithThumbnailType> {
         const thumbnailBuffer = await this.resizeImage(image.buffer);
         const [{ blobName: origin }, { blobName: thumbnail }] = await Promise.all([
             this.storage.uploadFile({ file: image, fileName }),
@@ -116,15 +121,15 @@ export class StorageService {
         return { origin, thumbnail };
     }
 
-    getFileStream(blobName: string) {
+    getFileStream(blobName: string): Promise<NodeJS.ReadableStream> {
         return this.storage.getFileStream(blobName);
     }
 
-    getFileBuffer(blobName: string) {
+    getFileBuffer(blobName: string): Promise<Buffer> {
         return this.storage.getFileBuffer(blobName);
     }
 
-    getRetrieveFileName(blobName: string) {
+    getRetrieveFileName(blobName: string): string {
         return this.storage.retrieveFileName(blobName);
     }
 

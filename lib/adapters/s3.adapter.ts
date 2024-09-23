@@ -56,7 +56,7 @@ export class S3Adapter extends BaseStorageAdapter implements StorageAdapter {
         }
     }
 
-    async copyFileFromUrl(url: string, fileName: string, isPublic: boolean) {
+    async copyFileFromUrl(url: string, fileName: string, isPublic: boolean): Promise<BlobClient | undefined> {
         const response = await fetch(url, { method: 'GET' });
         const buffer = Buffer.from(await response.arrayBuffer());
         return this.uploadFile({ file: buffer as any, fileName, isPublic: isPublic });
@@ -69,7 +69,7 @@ export class S3Adapter extends BaseStorageAdapter implements StorageAdapter {
         return generateUniqueName(fileName);
     }
 
-    public async uploadFile(data: UploadFileType) {
+    public async uploadFile(data: UploadFileType): Promise<BlobClient | undefined> {
         const { file, fileName, mimetype, blobName } = data;
         const blobOptions = mimetype === SVG_FILE_TYPE ? { ContentType: SVG_FILE_TYPE } : {};
         let uniqueBlobName: string;
@@ -136,7 +136,7 @@ export class S3Adapter extends BaseStorageAdapter implements StorageAdapter {
         blobName: string,
         expiresOn = dayjs().add(this.account.expiredIn, 'second').toDate(),
         options = {}
-    ) {
+    ): Promise<string> {
         if (!blobName) {
             return;
         }
@@ -200,7 +200,7 @@ export class S3Adapter extends BaseStorageAdapter implements StorageAdapter {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    public async deleteFile(blobName: string) {
+    public async deleteFile(blobName: string): Promise<void> {
         throw new TypeError('Implement later');
     }
 
