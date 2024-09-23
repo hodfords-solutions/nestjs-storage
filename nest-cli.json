@@ -1,19 +1,19 @@
 {
   "collection": "@nestjs/schematics",
-  "sourceRoot": "src",
+  "sourceRoot": "samples/quickstart/src",
   "projects": {
     "nestjs-storage": {
       "type": "library",
-      "root": "libs",
+      "root": "lib",
       "entryFile": "index",
-      "sourceRoot": "libs"
+      "sourceRoot": "lib"
     }
   },
   "compilerOptions": {
     "webpack": false,
     "assets": [
       {
-        "include": "../libs/public/**",
+        "include": "../lib/public/**",
         "watchAssets": true
       }
     ]
