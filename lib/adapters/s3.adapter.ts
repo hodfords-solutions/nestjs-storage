@@ -73,7 +73,6 @@ export class S3Adapter extends BaseStorageAdapter implements StorageAdapter {
         const { file, fileName, mimetype, blobName } = data;
         const blobOptions = mimetype === SVG_FILE_TYPE ? { ContentType: SVG_FILE_TYPE } : {};
         let uniqueBlobName: string;
-
         try {
             if (file instanceof Buffer) {
                 uniqueBlobName = this.generateBlobName(fileName || '', blobName);
@@ -111,7 +110,6 @@ export class S3Adapter extends BaseStorageAdapter implements StorageAdapter {
                     await this.containerClient.send(command);
                 }
             }
-
             return {
                 containerName: this.account.containerName,
                 blobName: uniqueBlobName
@@ -199,7 +197,6 @@ export class S3Adapter extends BaseStorageAdapter implements StorageAdapter {
         };
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     public async deleteFile(blobName: string): Promise<void> {
         throw new TypeError('Implement later');
     }
