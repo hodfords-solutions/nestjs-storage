@@ -27,6 +27,7 @@ export class BlobStorageEngine implements StorageEngine {
         this.containerClient = blobServiceClient.getContainerClient(options.containerName);
     }
 
+    /* eslint-disable @typescript-eslint/naming-convention */
     async _handleFile(
         req: Request,
         file: Express.Multer.File,
