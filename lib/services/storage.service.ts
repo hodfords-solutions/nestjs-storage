@@ -15,7 +15,7 @@ import { OptionUploadFileType } from '../types/option-upload-file.type';
 import { BlobClient } from '../types/blob-client.type';
 import { ImageFormatEnum } from '../enums/image-format.enum';
 import { MimeTypeEnum } from '../enums/mime-type.enum';
-import { ImageWithThumbnailType } from 'lib/types/image-with-thumbnail.type';
+import { ImageWithThumbnailType } from '../types/image-with-thumbnail.type';
 
 @Global()
 @Injectable()
