@@ -15,6 +15,7 @@ import { ProxyAgent } from 'proxy-agent';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import * as fs from 'fs';
 import * as util from 'util';
+import { Upload } from '@aws-sdk/lib-storage';
 
 @Injectable()
 export class S3Adapter extends BaseStorageAdapter implements StorageAdapter {
@@ -40,12 +41,18 @@ export class S3Adapter extends BaseStorageAdapter implements StorageAdapter {
     async uploadStream(stream: Readable, fileName: string): Promise<BlobClient> {
         try {
             const blobName = generateUniqueName(fileName);
-            const command = new PutObjectCommand({
-                Key: blobName,
-                Bucket: this.account.containerName,
-                Body: stream
+
+            const upload = new Upload({
+                client: this.containerClient,
+                params: {
+                    Bucket: this.account.containerName,
+                    Key: blobName,
+                    Body: stream
+                }
             });
-            await this.containerClient.send(command);
+
+            await upload.done();
+
             return {
                 containerName: this.account.containerName,
                 blobName
