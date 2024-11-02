@@ -4,6 +4,7 @@ export const env = {
         ACCOUNT_KEY: '',
         CONTAINER_NAME: '',
         SAS_EXPIRED_IN: 3600,
-        CONTAINER_LEVEL: 'blob'
+        CONTAINER_LEVEL: 'blob',
+        REGION: ''
     }
 };
