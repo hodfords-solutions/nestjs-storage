@@ -11,8 +11,8 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { AppService } from './app.service';
-import * as fs from 'fs';
 import { BlobClient, getFileUrl, StorageService } from 'lib';
+import axios from 'axios';
 
 @Controller()
 export class AppController {
@@ -44,7 +44,9 @@ export class AppController {
     }
 
     @Post('upload-stream')
-    uploadStream(): Promise<BlobClient> {
-        return this.storageService.uploadStream(fs.createReadStream(`${process.cwd()}/.gitignore`), 'test.txt');
+    async uploadStream(): Promise<BlobClient> {
+        const url = 'https://picsum.photos/200/300';
+        const response = await axios.get(url, { responseType: 'stream', timeout: 60000 });
+        return this.storageService.uploadStream(response.data, 'images/test.png');
     }
 }
