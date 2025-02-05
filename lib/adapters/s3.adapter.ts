@@ -101,18 +101,18 @@ export class S3Adapter extends BaseStorageAdapter implements StorageAdapter {
                         ...blobOptions,
                         Key: uniqueBlobName,
                         Bucket: this.account.containerName,
-                        Body: file.buffer,
+                        Body: file.buffer as Buffer,
                         ACL: data.isPublic ? 'public-read' : undefined
                     });
                     await this.containerClient.send(command);
                 } else {
                     const readFile = util.promisify(fs.readFile);
-                    const fileContent = await readFile(file.path);
+                    const fileContent = await readFile((file as Express.Multer.File).path);
                     const command = new PutObjectCommand({
                         Key: uniqueBlobName,
                         Bucket: this.account.containerName,
                         Body: fileContent,
-                        ContentType: file.mimetype
+                        ContentType: (file as Express.Multer.File).mimetype ?? 'application/octet-stream'
                     });
                     await this.containerClient.send(command);
                 }
