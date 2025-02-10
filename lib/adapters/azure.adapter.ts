@@ -78,7 +78,9 @@ export class AzureAdapter extends BaseStorageAdapter implements StorageAdapter {
                     await blockBlobClient.upload(file.buffer, file.buffer.byteLength, blobOptions);
                 } else {
                     const options: BlockBlobParallelUploadOptions = {
-                        blobHTTPHeaders: { blobContentType: file.mimetype }
+                        blobHTTPHeaders: {
+                            blobContentType: (file as Express.Multer.File).mimetype ?? 'application/octet-stream'
+                        }
                     };
                     await blockBlobClient.uploadFile((file as Express.Multer.File).path, options);
                 }
