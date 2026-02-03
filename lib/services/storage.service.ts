@@ -147,7 +147,9 @@ export class StorageService {
             buffer = await sharp(file).toFormat(imageFormat).toBuffer();
         } else {
             if (file.buffer) {
-                buffer = await sharp(file.buffer).toFormat(imageFormat).toBuffer();
+                buffer = await sharp(file.buffer as unknown as Buffer)
+                    .toFormat(imageFormat)
+                    .toBuffer();
             } else {
                 buffer = await sharp((file as Express.Multer.File).path)
                     .toFormat(imageFormat)
