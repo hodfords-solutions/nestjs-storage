@@ -70,12 +70,12 @@ export class AzureAdapter extends BaseStorageAdapter implements StorageAdapter {
             if (file instanceof Buffer) {
                 blobName = generateUniqueName(fileName || '');
                 blockBlobClient = this.containerClient.getBlockBlobClient(blobName);
-                await blockBlobClient.upload(file.buffer, file.buffer.byteLength, blobOptions);
+                await blockBlobClient.upload(file.buffer as unknown as Buffer, file.buffer.byteLength, blobOptions);
             } else {
                 blobName = generateUniqueName(fileName || this.getFileNameToUpload(file as Express.Multer.File));
                 blockBlobClient = this.containerClient.getBlockBlobClient(blobName);
                 if (file.buffer) {
-                    await blockBlobClient.upload(file.buffer, file.buffer.byteLength, blobOptions);
+                    await blockBlobClient.upload(file.buffer as unknown as Buffer, file.buffer.byteLength, blobOptions);
                 } else {
                     const options: BlockBlobParallelUploadOptions = {
                         blobHTTPHeaders: {
