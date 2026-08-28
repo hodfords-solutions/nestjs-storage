@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { storageConfig } from './configs/storage.config';
+import { AppController } from './app.controller.js';
+import { AppService } from './app.service.js';
+import { storageConfig } from './configs/storage.config.js';
 
 @Module({
     imports: [storageConfig],

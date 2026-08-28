@@ -13,16 +13,16 @@ import {
 import { Inject, Injectable, InternalServerErrorException } from '@nestjs/common';
 import dayjs from 'dayjs';
 import stream, { Readable } from 'stream';
-import { CLOUD_ACCOUNT } from '../constants/provider.constants';
-import { SVG_FILE_TYPE } from '../constants/svg-file-type.constant';
-import { generateUniqueName } from '../helpers/file-name.helper';
-import { StorageAdapter } from '../interfaces/storage-adapter.interface';
-import { AzureAccountType } from '../types/account.type';
-import { BlobClient } from '../types/blob-client.type';
-import { BlobStorageProperties } from '../types/blob-storage-properties.type';
-import { BlobUploadHeaders } from '../types/blob-upload-headers.type';
-import { UploadFileType } from '../types/upload-file.type';
-import { BaseStorageAdapter } from './base-storage.adapter';
+import { CLOUD_ACCOUNT } from '../constants/provider.constants.js';
+import { SVG_FILE_TYPE } from '../constants/svg-file-type.constant.js';
+import { generateUniqueName } from '../helpers/file-name.helper.js';
+import { StorageAdapter } from '../interfaces/storage-adapter.interface.js';
+import { AzureAccountType } from '../types/account.type.js';
+import { BlobClient } from '../types/blob-client.type.js';
+import { BlobStorageProperties } from '../types/blob-storage-properties.type.js';
+import { BlobUploadHeaders } from '../types/blob-upload-headers.type.js';
+import { UploadFileType } from '../types/upload-file.type.js';
+import { BaseStorageAdapter } from './base-storage.adapter.js';
 
 @Injectable()
 export class AzureAdapter extends BaseStorageAdapter implements StorageAdapter {

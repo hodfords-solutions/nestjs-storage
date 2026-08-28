@@ -1,5 +1,5 @@
-import { StorageModule } from 'lib/storage.module';
-import { env } from './env.config';
+import { StorageModule } from '../../lib/storage.module.js';
+import { env } from './env.config.js';
 
 export const storageConfig = StorageModule.forRoot({
     account: {

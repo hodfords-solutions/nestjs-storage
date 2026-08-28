@@ -6,6 +6,21 @@
 Nestjs-Storage provides a powerful filesystem abstraction. The Nestjs-Storage integration provides simple drivers for working with local filesystems, Amazon S3, Azure. Even better, it's amazingly simple to switch between these storage options between your local development machine and production server as the API remains the same for each system.
 </p>
 
+## Requirements 📋
+
+This package is **ESM-only** (it ships `"type": "module"` and has no CommonJS build).
+
+- Node.js `>=20.19.0` (or `>=22.12`, `>=24.15`, `>=26`)
+- NestJS 12
+- Consumer projects must use ESM `import` — `require('@hodfords/nestjs-storage')` is not supported.
+
+### Compatibility
+
+| `@hodfords/nestjs-storage` | NestJS | Module format |
+| -------------------------- | ------ | ------------- |
+| `12.x`                     | 12.x   | ESM only      |
+| `11.x`                     | 11.x   | CommonJS      |
+
 ## Installation 🤖
 To begin using it, we first install the required dependencies.
 ```

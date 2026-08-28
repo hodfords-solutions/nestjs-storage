@@ -2,20 +2,20 @@ import { BadRequestException, Global, Inject, Injectable } from '@nestjs/common'
 import AdmZip from 'adm-zip';
 import stream, { Readable } from 'stream';
 import sharp from 'sharp';
-import { UploadFileType } from '../types/upload-file.type';
-import { StorageAdapter } from '../interfaces/storage-adapter.interface';
-import { ADAPTER } from '../constants/provider.constants';
-import { BlobStorageProperties } from '../types/blob-storage-properties.type';
-import { BlobUploadHeaders } from '../types/blob-upload-headers.type';
+import { UploadFileType } from '../types/upload-file.type.js';
+import { StorageAdapter } from '../interfaces/storage-adapter.interface.js';
+import { ADAPTER } from '../constants/provider.constants.js';
+import { BlobStorageProperties } from '../types/blob-storage-properties.type.js';
+import { BlobUploadHeaders } from '../types/blob-upload-headers.type.js';
 import { BlobSASSignatureValues } from '@azure/storage-blob';
 import { randomUUID } from 'crypto';
-import { JPEG_MIME_TYPE, SUPPORTED_FORMAT_CONVERT_TO_PNG_TYPES } from '../constants/file.constant';
-import { ImageDetailType } from '../types/image-detail.type';
-import { OptionUploadFileType } from '../types/option-upload-file.type';
-import { BlobClient } from '../types/blob-client.type';
-import { ImageFormatEnum } from '../enums/image-format.enum';
-import { MimeTypeEnum } from '../enums/mime-type.enum';
-import { ImageWithThumbnailType } from '../types/image-with-thumbnail.type';
+import { JPEG_MIME_TYPE, SUPPORTED_FORMAT_CONVERT_TO_PNG_TYPES } from '../constants/file.constant.js';
+import { ImageDetailType } from '../types/image-detail.type.js';
+import { OptionUploadFileType } from '../types/option-upload-file.type.js';
+import { BlobClient } from '../types/blob-client.type.js';
+import { ImageFormatEnum } from '../enums/image-format.enum.js';
+import { MimeTypeEnum } from '../enums/mime-type.enum.js';
+import { ImageWithThumbnailType } from '../types/image-with-thumbnail.type.js';
 
 @Global()
 @Injectable()

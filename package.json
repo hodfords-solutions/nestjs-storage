@@ -12,9 +12,23 @@
     },
     "license": "UNLICENSED",
     "author": "",
+    "type": "module",
+    "main": "./index.js",
+    "types": "./index.d.ts",
+    "exports": {
+        ".": {
+            "types": "./index.d.ts",
+            "import": "./index.js",
+            "default": "./index.js"
+        },
+        "./package.json": "./package.json"
+    },
+    "engines": {
+        "node": ">=20.19.0"
+    },
     "scripts": {
         "prebuild": "rimraf dist",
-        "build": "nest build",
+        "build": "tsc -p tsconfig.build.json",
         "format": "prettier --write \"sample/*/**/*.ts\" \"lib/**/*.ts\"",
         "postbuild": "cp package.json dist/lib && cp README.md dist/lib && cp .npmrc dist/lib",
         "lint": "eslint \"{sample/*,apps,lib,test}/**/*.ts\" --fix",
@@ -24,37 +38,11 @@
         "start": "nest start",
         "start:debug": "nest start --debug --watch",
         "start:dev": "npm run prebuild && nest start --watch",
-        "test": "jest",
-        "test:cov": "jest --coverage",
-        "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-        "test:e2e": "jest --config ./test/jest-e2e.json",
-        "test:watch": "jest --watch",
+        "test": "vitest run",
+        "test:watch": "vitest",
+        "test:cov": "vitest run --coverage",
         "version": "auto-changelog && git add CHANGELOG.md",
         "wz-command": "wz-command"
-    },
-    "jest": {
-        "collectCoverageFrom": [
-            "**/*.(t|j)s"
-        ],
-        "coverageDirectory": "./coverage",
-        "moduleFileExtensions": [
-            "js",
-            "json",
-            "ts"
-        ],
-        "moduleNameMapper": {
-            "^@hodfords/nestjs-storage(|/.*)$": "<rootDir>/libs/nestjs-storage/src/$1"
-        },
-        "rootDir": ".",
-        "roots": [
-            "<rootDir>/src/",
-            "<rootDir>/libs/"
-        ],
-        "testEnvironment": "node",
-        "testRegex": ".*\\.spec\\.ts$",
-        "transform": {
-            "^.+\\.(t|j)s$": "ts-jest"
-        }
     },
     "dependencies": {
         "@aws-sdk/client-s3": "3.981.0",
@@ -71,16 +59,21 @@
         "slugify": "1.6.6",
         "uuid": "^13.0.0"
     },
+    "peerDependencies": {
+        "@nestjs/common": ">=12.0.0",
+        "@nestjs/core": ">=12.0.0"
+    },
     "devDependencies": {
         "@hodfords/nestjs-eslint-config": "^11.0.2",
         "@hodfords/nestjs-prettier-config": "^11.0.1",
-        "@nestjs/cli": "11.0.16",
-        "@nestjs/common": "11.1.12",
-        "@nestjs/core": "11.1.12",
-        "@nestjs/platform-express": "11.1.12",
-        "@nestjs/testing": "11.1.12",
+        "@nestjs/cli": "12.0.0",
+        "@nestjs/common": "12.0.1",
+        "@nestjs/core": "12.0.1",
+        "@nestjs/platform-express": "12.0.1",
+        "@nestjs/testing": "12.0.1",
+        "@swc/core": "^1.13.5",
+        "@types/adm-zip": "^0.5.7",
         "@types/express": "5.0.6",
-        "@types/jest": "30.0.0",
         "@types/multer": "2.0.0",
         "@types/node": "25.2.0",
         "@types/supertest": "6.0.3",
@@ -90,17 +83,14 @@
         "eslint": "9.39.2",
         "husky": "9.1.7",
         "is-ci": "4.1.0",
-        "jest": "30.2.0",
         "lint-staged": "16.2.7",
         "prettier": "3.8.1",
         "reflect-metadata": "0.2.2",
         "rimraf": "6.1.2",
         "rxjs": "7.8.2",
         "supertest": "7.2.2",
-        "ts-jest": "29.4.6",
-        "ts-loader": "9.5.4",
-        "ts-node": "10.9.2",
-        "tsconfig-paths": "4.2.0",
-        "typescript": "5.9.3"
+        "typescript": "5.9.3",
+        "unplugin-swc": "^1.5.7",
+        "vitest": "^4.1.10"
     }
 }

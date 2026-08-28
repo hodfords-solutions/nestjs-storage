@@ -9,8 +9,8 @@ import {
     generateBlobSASQueryParameters,
     StorageSharedKeyCredential
 } from '@azure/storage-blob';
-import { MulterOutFile } from '../interfaces/multer-out-file.interface';
-import { StorageEngineOptions } from '../types/storage-engine.options';
+import { MulterOutFile } from '../interfaces/multer-out-file.interface.js';
+import { StorageEngineOptions } from '../types/storage-engine.options.js';
 
 export class BlobStorageEngine implements StorageEngine {
     private containerName: string;
