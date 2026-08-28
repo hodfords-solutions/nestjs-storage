@@ -1,6 +1,6 @@
 {
     "name": "@hodfords/nestjs-storage",
-    "version": "12.0.1",
+    "version": "12.0.2",
     "description": "Provides integration with third-party cloud storage solutions in NestJS apps",
     "homepage": "https://github.com/hodfords-solutions/nestjs-storage#readme",
     "bugs": {
@@ -35,9 +35,9 @@
         "prepare": "is-ci || husky",
         "release:patch": "git add CHANGELOG.md && npm version patch --tag-version-prefix='' -f -m 'chore: release to %s'",
         "release:push": "git push --no-verify && git push --tags --no-verify",
-        "start": "nest start",
-        "start:debug": "nest start --debug --watch",
-        "start:dev": "npm run prebuild && nest start --watch",
+        "start": "nest start -p tsconfig.sample.json",
+        "start:debug": "nest start --debug --watch -p tsconfig.sample.json",
+        "start:dev": "npm run prebuild && nest start --watch -p tsconfig.sample.json",
         "test": "vitest run",
         "test:watch": "vitest",
         "test:cov": "vitest run --coverage",
