@@ -1,8 +1,8 @@
 import stream, { Readable } from 'stream';
-import { BlobClient } from '../types/blob-client.type';
-import { UploadFileType } from '../types/upload-file.type';
-import { BlobStorageProperties } from '../types/blob-storage-properties.type';
-import { BlobUploadHeaders } from '../types/blob-upload-headers.type';
+import { BlobClient } from '../types/blob-client.type.js';
+import { UploadFileType } from '../types/upload-file.type.js';
+import { BlobStorageProperties } from '../types/blob-storage-properties.type.js';
+import { BlobUploadHeaders } from '../types/blob-upload-headers.type.js';
 
 export interface StorageAdapter {
     getFileNameToUpload(file: Express.Multer.File): string;

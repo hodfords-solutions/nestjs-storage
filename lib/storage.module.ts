@@ -1,9 +1,9 @@
 import { DynamicModule, Global, Module } from '@nestjs/common';
-import { AzureAdapter } from './adapters/azure.adapter';
-import { ADAPTER, CLOUD_ACCOUNT } from './constants/provider.constants';
-import { StorageService } from './services/storage.service';
-import { StorageOptions } from './types/storage-options.type';
-import { S3Adapter } from './adapters/s3.adapter';
+import { AzureAdapter } from './adapters/azure.adapter.js';
+import { ADAPTER, CLOUD_ACCOUNT } from './constants/provider.constants.js';
+import { StorageService } from './services/storage.service.js';
+import { StorageOptions } from './types/storage-options.type.js';
+import { S3Adapter } from './adapters/s3.adapter.js';
 
 @Global()
 @Module({})

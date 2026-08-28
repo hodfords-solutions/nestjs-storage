@@ -1,4 +1,4 @@
-import { AzureAccountType, S3AccountType } from './account.type';
+import { AzureAccountType, S3AccountType } from './account.type.js';
 
 export type StorageOptions =
     | {

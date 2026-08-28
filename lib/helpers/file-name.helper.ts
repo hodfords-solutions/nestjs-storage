@@ -1,6 +1,13 @@
 import { v4 as uuidv4 } from 'uuid';
 import path from 'path';
-import slugify from 'slugify';
+import slugifyModule from 'slugify';
+
+/**
+ * `slugify` is published as CommonJS (`module.exports = slugify`) but ships ESM-style typings.
+ * Under `moduleResolution: nodenext` TypeScript therefore sees the module namespace instead of
+ * the callable default, while Node's ESM interop hands us the function itself at runtime.
+ */
+const slugify = slugifyModule as unknown as (typeof slugifyModule)['default'];
 
 export function generateUniqueName(filePath: string): string {
     const uuid = uuidv4();

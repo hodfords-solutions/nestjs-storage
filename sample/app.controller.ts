@@ -10,8 +10,8 @@ import {
     UseInterceptors
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { AppService } from './app.service';
-import { BlobClient, getFileUrl, StorageService } from 'lib';
+import { AppService } from './app.service.js';
+import { BlobClient, getFileUrl, StorageService } from '../lib/index.js';
 import axios from 'axios';
 
 @Controller()
