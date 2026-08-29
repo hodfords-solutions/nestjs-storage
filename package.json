@@ -1,6 +1,6 @@
 {
     "name": "@hodfords/nestjs-storage",
-    "version": "12.0.2",
+    "version": "12.1.0",
     "description": "Provides integration with third-party cloud storage solutions in NestJS apps",
     "homepage": "https://github.com/hodfords-solutions/nestjs-storage#readme",
     "bugs": {
@@ -27,7 +27,7 @@
         "node": ">=20.19.0"
     },
     "scripts": {
-        "prebuild": "rimraf dist",
+        "prebuild": "rimraf dist *.tsbuildinfo",
         "build": "tsc -p tsconfig.build.json",
         "format": "prettier --write \"sample/*/**/*.ts\" \"lib/**/*.ts\"",
         "postbuild": "cp package.json dist/lib && cp README.md dist/lib && cp .npmrc dist/lib",
@@ -89,7 +89,7 @@
         "rimraf": "6.1.2",
         "rxjs": "7.8.2",
         "supertest": "7.2.2",
-        "typescript": "5.9.3",
+        "typescript": "6.0.3",
         "unplugin-swc": "^1.5.7",
         "vitest": "^4.1.10"
     }
