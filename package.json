@@ -1,6 +1,6 @@
 {
     "name": "@hodfords/nestjs-storage",
-    "version": "12.1.0",
+    "version": "12.2.0",
     "description": "Provides integration with third-party cloud storage solutions in NestJS apps",
     "homepage": "https://github.com/hodfords-solutions/nestjs-storage#readme",
     "bugs": {
@@ -53,7 +53,6 @@
         "dayjs": "1.11.19",
         "dotenv": "^17.2.3",
         "eslint-config-prettier": "^10.1.8",
-        "express": "5.2.1",
         "proxy-agent": "6.5.0",
         "sharp": "0.34.5",
         "slugify": "1.6.6",
@@ -61,7 +60,17 @@
     },
     "peerDependencies": {
         "@nestjs/common": ">=12.0.0",
-        "@nestjs/core": ">=12.0.0"
+        "@nestjs/core": ">=12.0.0",
+        "express": ">=5.0.0",
+        "multer": ">=2.0.0"
+    },
+    "peerDependenciesMeta": {
+        "express": {
+            "optional": true
+        },
+        "multer": {
+            "optional": true
+        }
     },
     "devDependencies": {
         "@hodfords/nestjs-eslint-config": "^11.0.2",
@@ -81,6 +90,7 @@
         "auto-changelog": "2.5.0",
         "axios": "^1.13.4",
         "eslint": "9.39.2",
+        "express": "5.2.1",
         "husky": "9.1.7",
         "is-ci": "4.1.0",
         "lint-staged": "16.2.7",
