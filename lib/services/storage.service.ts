@@ -1,7 +1,7 @@
 import { BadRequestException, Global, Inject, Injectable } from '@nestjs/common';
 import AdmZip from 'adm-zip';
 import stream, { Readable } from 'stream';
-import sharp from 'sharp';
+import sharp, { FormatEnum } from 'sharp';
 import { UploadFileType } from '../types/upload-file.type.js';
 import { StorageAdapter } from '../interfaces/storage-adapter.interface.js';
 import { ADAPTER } from '../constants/provider.constants.js';
@@ -16,6 +16,12 @@ import { BlobClient } from '../types/blob-client.type.js';
 import { ImageFormatEnum } from '../enums/image-format.enum.js';
 import { MimeTypeEnum } from '../enums/mime-type.enum.js';
 import { ImageWithThumbnailType } from '../types/image-with-thumbnail.type.js';
+
+/** sharp accepts `jpg` at runtime but only exposes `jpeg` in its format typings. */
+const sharpFormats: Record<ImageFormatEnum, keyof FormatEnum> = {
+    [ImageFormatEnum.PNG]: 'png',
+    [ImageFormatEnum.JPG]: 'jpeg'
+};
 
 @Global()
 @Injectable()
@@ -139,20 +145,21 @@ export class StorageService {
 
     async convertImagesToPng(data: UploadFileType, imageFormat: ImageFormatEnum): Promise<ImageDetailType> {
         const { file, mimetype } = data;
+        const sharpFormat = sharpFormats[imageFormat];
         let buffer: Buffer;
         if (this.validateFileImageConvert(mimetype ?? ('mimetype' in file && file.mimetype))) {
             throw new BadRequestException({ translate: 'error.file_not_support' });
         }
         if (file instanceof Buffer) {
-            buffer = await sharp(file).toFormat(imageFormat).toBuffer();
+            buffer = await sharp(file).toFormat(sharpFormat).toBuffer();
         } else {
             if (file.buffer) {
                 buffer = await sharp(file.buffer as unknown as Buffer)
-                    .toFormat(imageFormat)
+                    .toFormat(sharpFormat)
                     .toBuffer();
             } else {
                 buffer = await sharp((file as Express.Multer.File).path)
-                    .toFormat(imageFormat)
+                    .toFormat(sharpFormat)
                     .toBuffer();
             }
         }
