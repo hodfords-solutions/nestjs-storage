@@ -6,10 +6,13 @@ on:
 jobs:
   lint:
     uses: hodfords-solutions/actions/.github/workflows/lint.yaml@main
+    with:
+      package_manager: pnpm
   build:
     uses: hodfords-solutions/actions/.github/workflows/publish.yaml@main
     with:
       build_path: dist/lib
+      package_manager: pnpm
     secrets:
       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
   update-docs:
